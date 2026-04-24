@@ -1,0 +1,32 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# API keys and secrets
+.env
+kaggle.json
+.kaggle/
+
+# Data (too large for GitHub)
+data/
+*.zip
+*.h5
+*.pth
+*.pt
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Model weights (large files)
+models/*.pth
+models/*.h5
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
