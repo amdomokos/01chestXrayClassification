@@ -75,8 +75,6 @@ The standard workflow includes:
 2. Preprocessing and augmentation setup
 3. Model training on balanced data loaders
 4. Evaluation on held-out test set
-5. Comparison of model performance across runs
-
 
 ## Evaluation Metrics
 
