@@ -15,6 +15,31 @@ Medical imaging datasets often exhibit:
 This project focuses on building a reproducible benchmarking framework to evaluate how different models perform under these constraints.
 
 
+## Results (held-out test set, n=624)
+
+The original Kaggle validation split (16 images) was unusable, so the original train+val images were pooled and re-split with a stratified, **patient-grouped** split (`python -m src.splits` -> `data/splits.csv`; train 4,360 / val 872 / test 624, no patient in more than one split). The original test set is untouched. Model selection (best val ROC-AUC) uses the validation split only; the test set is evaluated once.
+
+| Metric | Value (95% bootstrap CI) |
+|---|---|
+| ROC-AUC | 0.962 (0.948-0.974) |
+| Sensitivity (PNEUMONIA recall) | 97.4% (95.6-99.0) |
+| Specificity (NORMAL recall) | 71.8% (66.2-77.4) |
+| Accuracy | 87.8% (85.4-90.2) |
+
+Confusion matrix: TN=168 FP=66 FN=10 TP=380. Class imbalance in the training split is 2.9:1 (PNEUMONIA:NORMAL); the test set is 1.7:1. Grad-CAM is implemented from scratch (forward/backward hooks on `layer4[-1]`) in `notebooks/04_model_playground.ipynb`.
+
+## Reproducing
+
+```
+pip install torch torchvision --index-url https://download.pytorch.org/whl/xpu   # Intel GPU (XPU); CPU/CUDA also work
+python -m src.splits      # build data/splits.csv
+python -m src.train --device auto --amp
+python -m src.evaluate
+```
+
+`--device auto` picks XPU > CUDA > CPU. Trained on an Intel Arc 140V (bf16 autocast).
+
+
 ## Dataset Structure
 
 The pipeline expects datasets organized in the following format:
@@ -31,7 +56,7 @@ The pipeline expects datasets organized in the following format:
     └── CLASS_1/
 ```
 
-Dataset loading is handled through PyTorch `ImageFolder`, enabling automatic label inference from directory structure.
+Images stay in the original Kaggle folders; `data/splits.csv` assigns each image to train/val/test, and `src/data_loader.py` reads it (`ManifestDataset`).
 
 
 ## Pipeline Design
@@ -100,14 +125,13 @@ The project is implemented in Python using PyTorch. Core components include:
 ## Future Improvements
 
 - Add standardized benchmark suite across multiple architectures
-- Integrate confusion matrix and ROC analysis
 - Extend support to additional imaging modalities
 - Add experiment tracking (e.g., Weights & Biases or TensorBoard)
 
 
 ## Summary
 
-This project provides a lightweight but structured framework for benchmarking deep learning
+This project provides a lightweight but structured framework for benchmarking deep learning models on bioimaging datasets.
 
 
 ## Acknowledgements
